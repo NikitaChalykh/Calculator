@@ -2,6 +2,8 @@ import datetime as dt
 
 
 class Record:
+    FORMAT_DATE = '%d.%m.%Y'
+
     def __init__(self, amount, comment, date=None):
         """
         Класс для создания записей в калькулятор.
@@ -17,12 +19,10 @@ class Record:
         if date is None:
             self.date = dt.datetime.now().date()
         else:
-            self.date = dt.datetime.strptime(date, '%d.%m.%Y').date()
+            self.date = dt.datetime.strptime(date, self.FORMAT_DATE).date()
 
 
 class Calculator:
-    today_date = dt.datetime.now().date()
-
     def __init__(self, limit):
         """
         Родительский класс калькулятора.
@@ -39,8 +39,8 @@ class Calculator:
         """
         Родительский метод создания записи класса калькулятора.
         Метод создает запись в конец списка 'records'.
-        В качестве типа записи выступает другой список
-        - свойства объекта класса Record (записи в калькулятор).
+        В качестве типа записи выступает
+        объект класса Record.
         """
         self.records.append(record)
 
@@ -50,10 +50,11 @@ class Calculator:
         Метод суммирует единицы калькулятора
         из списка 'records' за текущий день.
         """
+        today_date = dt.datetime.now().date()
         sum_today = 0
-        for i in range(0, len(self.records)):
-            if self.records[i].date == self.today_date:
-                sum_today += self.records[i].amount
+        for record in self.records:
+            if record.date == today_date:
+                sum_today += record.amount
         return sum_today
 
     def get_week_stats(self):
@@ -62,13 +63,22 @@ class Calculator:
         Метод суммирует единицы калькулятора из списка 'records'
         за последнюю неделю.
         """
+        today_date = dt.datetime.now().date()
+        delta_days_0 = dt.timedelta(days=0)
+        delta_days_7 = dt.timedelta(days=7)
         sum_week = 0
-        for i in range(0, len(self.records)):
-            if (self.today_date - self.records[i].date >= dt.timedelta(days=0)
-                    and self.today_date
-                    - self.records[i].date <= dt.timedelta(days=7)):
-                sum_week += self.records[i].amount
+        for record in self.records:
+            if (today_date - record.date >= delta_days_0
+                    and today_date
+                    - record.date <= delta_days_7):
+                sum_week += record.amount
         return sum_week
+
+    def today_remainder(self):
+        return self.limit - self.get_today_stats()
+        """
+        Родительский метод подсчета остатка единиц за день от лимита.
+        """
 
 
 class CaloriesCalculator(Calculator):
@@ -79,12 +89,10 @@ class CaloriesCalculator(Calculator):
         """
         Дочерний метод подсчета остатка калорий за день от лимита.
         """
-        delta = self.limit - super().get_today_stats()
-        if delta >= 0:
+        if self.today_remainder() > 0:
             return ('Сегодня можно съесть что-нибудь ещё, но с общей'
-                    f' калорийностью не более {delta} кКал')
-        else:
-            return 'Хватит есть!'
+                    f' калорийностью не более {self.today_remainder()} кКал')
+        return 'Хватит есть!'
 
 
 class CashCalculator(Calculator):
@@ -96,26 +104,25 @@ class CashCalculator(Calculator):
 
     def get_today_cash_remained(self, currency):
         """
-        Дочерний метод подсчета остатка денег за день
+        Дочерний метод подсчета остатка валюты за день
         от лимита c учетом типа валюты.
         """
-        if currency == 'usd':
-            actual_currency = self.USD_RATE
-            text = 'USD'
-            delta = (self.limit - super().get_today_stats()) / actual_currency
-            remainder = round(delta, 2)
-        elif currency == 'eur':
-            actual_currency = self.EURO_RATE
-            text = 'Euro'
-            delta = (self.limit - super().get_today_stats()) / actual_currency
-            remainder = round(delta, 2)
-        else:
-            text = 'руб'
-            delta = self.limit - super().get_today_stats()
-            remainder = int(delta)
-        if delta > 0:
-            return f"На сегодня осталось {remainder} {text}"
-        elif delta == 0:
-            return "Денег нет, держись"
-        else:
-            return f"Денег нет, держись: твой долг - {-remainder} {text}"
+        if self.today_remainder() == 0:
+            return 'Денег нет, держись'
+        currency_list = [
+                        ['usd', 'USD', self.USD_RATE],
+                        ['eur', 'Euro', self.EURO_RATE],
+                        ['rub', 'руб', 1]
+        ]
+        for cash_currency in currency_list:
+            if cash_currency[0] == currency:
+                text = cash_currency[1]
+                currency_remainder = self.today_remainder() / cash_currency[2]
+                if currency != 'rub':
+                    correct_currency_remainder = round(currency_remainder, 2)
+                else:
+                    correct_currency_remainder = currency_remainder
+        if self.today_remainder() > 0:
+            return f'На сегодня осталось {correct_currency_remainder} {text}'
+        return (f'Денег нет, держись: твой долг - '
+                f'{-correct_currency_remainder} {text}')
