@@ -1,6 +1,7 @@
-"""Калькулятор денег и калорий."""
+"""ККалькулятор денег и калорий."""
 import datetime as dt
 FORMAT_DATE = '%d.%m.%Y'
+
 
 class Record:
     """Класс для создания записей в калькулятор.
@@ -86,7 +87,7 @@ class CaloriesCalculator(Calculator):
 
 class CashCalculator(Calculator):
     """Дочерний класс калькулятора валюты."""
-    
+
     USD_RATE = 80.50
     EURO_RATE = 90.51
 
@@ -98,9 +99,9 @@ class CashCalculator(Calculator):
         if cash_remained == 0:
             return 'Денег нет, держись'
         currency_list = {
-                        'usd': {'text': 'USD', 'cur': self.USD_RATE},
-                        'eur': {'text': 'Euro', 'cur': self.EURO_RATE},
-                        'rub': {'text': 'руб', 'cur': 1}
+            'usd': {'text': 'USD', 'cur': self.USD_RATE},
+            'eur': {'text': 'Euro', 'cur': self.EURO_RATE},
+            'rub': {'text': 'руб', 'cur': 1}
         }
         text = currency_list[currency]['text']
         currency_remainder = cash_remained / currency_list[currency]['cur']
