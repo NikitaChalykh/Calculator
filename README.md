@@ -16,6 +16,6 @@ API YaTube
 ```
 git clone 'https://github.com/NikitaChalykh/Calculator.git'
 
-cd hw_python_oop
+cd Calculator
 ```
-2.  Открыть проект в любом удобном IDE
+2.  Открыть и запустить проект в любом удобном IDE
