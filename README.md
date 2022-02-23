@@ -18,4 +18,4 @@ git clone 'https://github.com/NikitaChalykh/Calculator.git'
 
 cd Calculator
 ```
-2.  Открыть и запустить проект в любом удобном IDE
+2.  Открыть и запустить проект в любом удобном IDE.
