@@ -13,7 +13,7 @@ API YaTube
 Установка проекта из репозитория
 ----------
 1. Клонировать репозиторий и перейти в него в командной строке:
-```
+```bash
 git clone 'https://github.com/NikitaChalykh/Calculator.git'
 
 cd Calculator
